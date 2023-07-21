@@ -1,29 +1,22 @@
 use std::ops::Add;
 
-use crate::game::{
-    resources::Options,
-    snake::components::{Body, Snake},
-};
 use bevy::prelude::*;
+
+use crate::game::snake::components::{Body, Head};
+use crate::game::state::GameState;
 
 // use super::move_forward;
 
 pub fn key_board_movement(
-    mut snake: Query<&Snake>,
-    mut bodies: Query<(&mut Transform, &mut Body)>,
+    mut heads: Query<&mut Body, With<Head>>,
     keyboard_input: Res<Input<KeyCode>>,
-    // time: Res<Time>,
-    // options: Res<Options>,
+    mut game_state: ResMut<NextState<GameState>>,
 ) {
-    // let speed = options.speed;
-    // let delta_time = time.delta_seconds();
-    for snake in snake.iter_mut() {
-        if snake.id != "player" {
-            return;
-        }
-        if snake.list.front().is_none() {
-            continue;
-        }
+    if keyboard_input.pressed(KeyCode::Space) || keyboard_input.pressed(KeyCode::P) {
+        game_state.set(GameState::Menu);
+        return;
+    }
+    for mut body in heads.iter_mut().filter(|body| body.id == 1) {
         let mut direction = Vec3::ZERO;
         if keyboard_input.pressed(KeyCode::W) || keyboard_input.pressed(KeyCode::Up) {
             direction += Vec3::new(0.0, 1.0, 0.0);
@@ -44,10 +37,6 @@ pub fn key_board_movement(
         } else {
             return;
         };
-        let Some(entity) = snake.list.front() else{ return };
-        let Ok(mut body) = bodies.get_component_mut::<Body>(*entity) else{ return };
         body.direction = direction;
-        // let Ok(mut transform) = bodies.get_component_mut::<Transform>(*entity) else{ return };
-        // move_forward(&mut transform, direction, speed, delta_time);
     }
 }

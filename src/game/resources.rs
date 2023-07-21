@@ -1,4 +1,8 @@
-use bevy::prelude::Resource;
+use bevy::prelude::*;
+use rand::distributions::Uniform;
+use rand::prelude::ThreadRng;
+use std::cell::{Cell, RefCell, UnsafeCell};
+use std::pin::Pin;
 
 #[derive(Resource)]
 pub struct Options {
@@ -21,3 +25,17 @@ impl Options {
         Self::new(15, 500.0, 8.0, 8.0)
     }
 }
+
+#[derive(Resource)]
+pub struct BackgroundHandle {
+    pub(crate) handle: Handle<Image>,
+}
+
+#[derive(Resource)]
+pub struct BackgroundSpriteSize {
+    pub(crate) width: u32,
+    pub(crate) height: u32,
+}
+
+#[derive(Resource)]
+pub struct MyGamepad(pub Gamepad);

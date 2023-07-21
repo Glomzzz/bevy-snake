@@ -1,48 +1,14 @@
 use std::ops::Add;
 
-use crate::{
-    game::resources::Options,
-    game::snake::components::{Body, Snake},
-};
+use bevy::prelude::*;
 
-use bevy::{input::gamepad::GamepadConnectionEvent, prelude::*};
+use crate::game::resources::MyGamepad;
+use crate::game::snake::components::{Body, Head};
 
 // use super::move_forward;
 
-#[derive(Resource)]
-pub struct MyGamepad(Gamepad);
-
-pub fn gamepad_connections(
-    mut commands: Commands,
-    my_gamepad: Option<Res<MyGamepad>>,
-    mut gamepad_evr: EventReader<GamepadConnectionEvent>,
-) {
-    for event in gamepad_evr.iter() {
-        let gamepad = event.gamepad;
-        if event.connected() {
-            println!("New gamepad connected with ID: {:?}", gamepad);
-
-            // if we don't have any gamepad yet, use this one
-            if my_gamepad.is_none() {
-                commands.insert_resource(MyGamepad(gamepad));
-            }
-        } else {
-            println!("Lost gamepad connection with ID: {:?}", gamepad);
-
-            // if it's the one we previously associated with the player,
-            // disassociate it:
-            if let Some(MyGamepad(old_id)) = my_gamepad.as_deref() {
-                if old_id == &gamepad {
-                    commands.remove_resource::<MyGamepad>();
-                }
-            }
-        }
-    }
-}
-
 pub fn gamepad_movement(
-    mut snake: Query<&Snake>,
-    mut bodies: Query<(&mut Transform, &mut Body)>,
+    mut heads: Query<&mut Body, With<Head>>,
     axes: Res<Axis<GamepadAxis>>,
     my_gamepad: Option<Res<MyGamepad>>,
     // time: Res<Time>,
@@ -72,21 +38,9 @@ pub fn gamepad_movement(
         let direction = Vec3::new(x, y, 0.0)
             .normalize()
             .add(Vec3::new(0.0, 0.0, 0.0000001));
-
-        for snake in snake.iter_mut() {
-            if snake.id != "player" {
-                return;
-            }
-            if snake.list.front().is_none() {
-                continue;
-            }
-            let Some(entity) = snake.list.front() else{ return };
-            let Ok(mut body) = bodies.get_component_mut::<Body>(*entity) else{ return };
+        for mut body in heads.iter_mut().filter(|body| body.id == 1) {
             body.direction = direction;
-            // let Ok(mut transform) = bodies.get_component_mut::<Transform>(*entity) else{ return };
-            // move_forward(&mut transform, direction, speed, delta_time)
         }
-
         // // Example: check if the stick is pushed up
         // if left_stick_pos.length() > 0.9 && left_stick_pos.y > 0.5 {
         //     // do something

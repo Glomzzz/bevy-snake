@@ -1,4 +1,10 @@
 use bevy::prelude::*;
+use bevy::window::WindowMode;
+use bevy_kira_audio::AudioPlugin;
+
+use crate::game::menu::MenuPlugin;
+use crate::game::state::GameState;
+use crate::game::systems::gamepad_connections;
 
 use self::{
     resources::Options,
@@ -6,9 +12,12 @@ use self::{
     systems::{setup, setup_icon},
 };
 
+// Plugins
+mod menu;
+mod snake;
+// Game
 mod events;
 mod resources;
-mod snake;
 mod state;
 mod systems;
 
@@ -29,8 +38,10 @@ impl Plugin for GamePlugin {
             }),
             ..default()
         }))
+        .add_state::<GameState>()
         .insert_resource(Options::default())
         .add_systems(Startup, (setup, setup_icon))
-        .add_plugins(SnakePlugin);
+        .add_systems(Update, gamepad_connections)
+        .add_plugins((AudioPlugin, MenuPlugin, SnakePlugin));
     }
 }
